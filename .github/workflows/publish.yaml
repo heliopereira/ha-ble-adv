@@ -1,12 +1,27 @@
-# Worklow ran when a new release is published:
-#  - Patch the manifest.json file version with the one of the release
-#  - Build and Upload a ZIP release with this patched version to be used by HACS
-# On top of having the relevant version in manifest without needing to manually bump it,
-# it also allows to have download statistics in HACS
+# Workflow ran to publish a new release:
+#  - Can be triggered manually via 'workflow_dispatch' (Run workflow button) with auto-increment
+#  - Or automatically when a new release is published in GitHub
+#  - Patches manifest.json version, builds release.zip and uploads to the GitHub Release for HACS
 
 name: Publish
 
 on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Tipo de incremento de versão (se versão manual estiver em branco)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      custom_version:
+        description: 'Versão manual (ex: v2.2.15). Deixe vazio para incrementar automaticamente.'
+        required: false
+        default: ''
+        type: string
   release:
     types:
       - published
@@ -27,16 +42,76 @@ jobs:
         name: Get Domain name
         run: echo "name=$(ls custom_components)" >> $GITHUB_OUTPUT
 
+      - id: version
+        name: Determine Version and Tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+            VERSION="${TAG#v}"
+          elif [ -n "${{ github.event.inputs.custom_version }}" ]; then
+            TAG="${{ github.event.inputs.custom_version }}"
+            [[ "$TAG" =~ ^v ]] || TAG="v$TAG"
+            VERSION="${TAG#v}"
+          else
+            git fetch --tags
+            LATEST_TAG=$(git tag -l "v*" --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            if [ -z "$LATEST_TAG" ]; then
+              LATEST_TAG="v2.2.14"
+            fi
+            echo "Última tag encontrada: $LATEST_TAG"
+            
+            VERSION_NUM="${LATEST_TAG#v}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NUM"
+            PATCH=$(echo "$PATCH" | grep -oE '^[0-9]+')
+            
+            BUMP_TYPE="${{ github.event.inputs.bump_type }}"
+            if [ "$BUMP_TYPE" = "major" ]; then
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+            elif [ "$BUMP_TYPE" = "minor" ]; then
+              MINOR=$((MINOR + 1))
+              PATCH=0
+            else
+              PATCH=$((PATCH + 1))
+            fi
+            
+            VERSION="${MAJOR}.${MINOR}.${PATCH}"
+            TAG="v${VERSION}"
+          fi
+          
+          echo "Tag selecionada: $TAG"
+          echo "Versão selecionada: $VERSION"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push Git Tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.tag }} já existe."
+          else
+            git tag "${{ steps.version.outputs.tag }}"
+            git push origin "${{ steps.version.outputs.tag }}"
+          fi
+
       - name: Set version in manifest
         run: |
-          sed -i "s/\"version\":\s*\".*\"/\"version\": \"${{ github.event.release.tag_name }}\"/" custom_components/${{ steps.domain.outputs.name }}/manifest.json
+          sed -i "s/\"version\":\s*\".*\"/\"version\": \"${{ steps.version.outputs.tag }}\"/" custom_components/${{ steps.domain.outputs.name }}/manifest.json
 
       - name: ZIP release
         run: |
           cd ${{ github.workspace }}/custom_components/${{ steps.domain.outputs.name }}
           zip ${{ github.workspace }}/release.zip -r ./
 
-      - name: Upload zip to release
+      - name: Create or update GitHub Release
         uses: softprops/action-gh-release@v3.0.3
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_notes: true
           files: ${{ github.workspace }}/release.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
