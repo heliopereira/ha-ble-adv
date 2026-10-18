@@ -23,6 +23,7 @@ from ble_adv.fan import BleAdvFan, async_setup_entry, create_entity
 from homeassistant.components.fan import DIRECTION_FORWARD, DIRECTION_REVERSE, FanEntityFeature
 from homeassistant.const import CONF_TYPE
 from homeassistant.core import HomeAssistant
+from homeassistant.util.percentage import ranged_value_to_percentage
 
 from .conftest import _Device, create_base_entry
 
@@ -222,10 +223,10 @@ async def test_fan_speed_presets(device: _Device) -> None:
     assert fan.preset_modes == [PRESET_MODE_SLEEP, PRESET_MODE_WORK, PRESET_MODE_TURBO, "breeze", "sleep"]
     await fan.async_added_to_hass()
 
-    # Test setting sleep mode preset -> speed 1 (17%)
+    # Test setting sleep mode preset -> speed 1
     await fan.async_set_preset_mode(PRESET_MODE_SLEEP)
     assert fan.preset_mode == PRESET_MODE_SLEEP
-    assert fan.percentage == 17
+    assert fan.percentage == ranged_value_to_percentage((1, 6), 1)
     assert fan.get_attrs() == {ATTR_ON: True, ATTR_SPEED_COUNT: 6, ATTR_DIR: True, ATTR_OSC: False, ATTR_PRESET: None, ATTR_SPEED: 1}
     device.assert_apply_change(fan, [ATTR_ON, ATTR_SPEED])
 
@@ -246,7 +247,7 @@ async def test_fan_speed_presets(device: _Device) -> None:
     # Test voice/localized alias matching
     await fan.async_set_preset_mode("Modo Dormir")
     assert fan.preset_mode == PRESET_MODE_SLEEP
-    assert fan.percentage == 17
+    assert fan.percentage == ranged_value_to_percentage((1, 6), 1)
 
     await fan.async_set_preset_mode("Calor Extremo")
     assert fan.preset_mode == PRESET_MODE_TURBO
