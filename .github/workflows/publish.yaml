@@ -1,8 +1,7 @@
-# Worklow ran when a new release is published:
-#  - Patch the manifest.json file version with the one of the release
-#  - Build and Upload a ZIP release with this patched version to be used by HACS
-# On top of having the relevant version in manifest without needing to manually bump it,
-# it also allows to have download statistics in HACS
+# Workflow executado quando uma nova Release é publicada:
+#  - Atualiza a versão no manifest.json com a tag da release
+#  - Gera o release.zip com a integração pronta para o HACS
+#  - Faz upload do release.zip nos anexos da Release
 
 name: Publish
 
@@ -10,6 +9,15 @@ on:
   release:
     types:
       - published
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag/Versão da Release (ex: v1.0.0)'
+        required: false
+        default: 'v1.0.0'
 
 jobs:
   release_zip_file:
@@ -19,7 +27,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -27,9 +35,21 @@ jobs:
         name: Get Domain name
         run: echo "name=$(ls custom_components)" >> $GITHUB_OUTPUT
 
+      - id: get_version
+        name: Determine version tag
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          elif [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Set version in manifest
         run: |
-          sed -i "s/\"version\":\s*\".*\"/\"version\": \"${{ github.event.release.tag_name }}\"/" custom_components/${{ steps.domain.outputs.name }}/manifest.json
+          sed -i 's/"version":\s*".*"/"version": "'${{ steps.get_version.outputs.tag }}'"/' custom_components/${{ steps.domain.outputs.name }}/manifest.json
 
       - name: ZIP release
         run: |
@@ -37,6 +57,7 @@ jobs:
           zip ${{ github.workspace }}/release.zip -r ./
 
       - name: Upload zip to release
-        uses: softprops/action-gh-release@v3.0.3
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
         with:
           files: ${{ github.workspace }}/release.zip

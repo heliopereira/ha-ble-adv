@@ -209,7 +209,7 @@ class BleAdvFan(BleAdvEntity, FanEntity):
             self._attr_preset_mode = None
             await self._handle_state_change({ATTR_IS_ON: False})
         else:
-            speed_val = ceil(percentage_to_ranged_value((1, self._attr_speed_count), percentage))
+            speed_val = max(1, round(percentage_to_ranged_value((1, self._attr_speed_count), percentage)))
             self._attr_preset_mode = next((name for name, spd in self._speed_presets.items() if spd == speed_val), None)
             await self._handle_state_change({ATTR_IS_ON: True, ATTR_PERCENTAGE: percentage})
 
