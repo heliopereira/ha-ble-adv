@@ -59,19 +59,21 @@ jobs:
         with:
           script: |
             const commits = `${{ steps.check_upstream.outputs.log }}`.replace(/\\n/g, '\n');
+            const body = [
+              '### O robô sincronizou novidades do projeto original!',
+              '',
+              'As seguintes alterações foram mescladas com sucesso na branch `main`:',
+              '```text',
+              commits,
+              '```',
+              '',
+              'Elas já estão disponíveis no seu fork e prontas para atualizar no seu Home Assistant através do HACS!'
+            ].join('\n');
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: '🚀 [Sincronização Automática] Novas atualizações recebidas de NicoIIT/ha-ble-adv',
-              body: `### O robô sincronizou novidades do projeto original!
-
-As seguintes alterações foram mescladas com sucesso na branch \`main\`:
-
-\`\`\`text
-${commits}
-\`\`\`
-
-Elas já estão disponíveis no seu fork e prontas para atualizar no seu Home Assistant através do HACS!`
+              body: body
             });
 
       - name: Notificar em Caso de Conflito
