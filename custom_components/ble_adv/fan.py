@@ -206,12 +206,12 @@ class BleAdvFan(BleAdvEntity, FanEntity):
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
         if percentage == 0:
-            self._attr_preset_mode = None
             await self._handle_state_change({ATTR_IS_ON: False})
+            self._attr_preset_mode = None
         else:
             speed_val = max(1, round(percentage_to_ranged_value((1, self._attr_speed_count), percentage)))
-            self._attr_preset_mode = next((name for name, spd in self._speed_presets.items() if spd == speed_val), None)
             await self._handle_state_change({ATTR_IS_ON: True, ATTR_PERCENTAGE: percentage})
+            self._attr_preset_mode = next((name for name, spd in self._speed_presets.items() if spd == speed_val), None)
 
     async def async_set_direction(self, direction: str) -> None:
         """Set the direction of the fan."""
@@ -227,7 +227,7 @@ class BleAdvFan(BleAdvEntity, FanEntity):
         if target_speed is not None:
             target_percent = ranged_value_to_percentage((1, self._attr_speed_count), target_speed)
             display_name = next((name for name, spd in self._speed_presets.items() if spd == target_speed), preset_mode)
-            self._attr_preset_mode = display_name
             await self.async_set_percentage(target_percent)
+            self._attr_preset_mode = display_name
         else:
             await self._handle_state_change({ATTR_IS_ON: True, ATTR_PRESET_MODE: preset_mode})
