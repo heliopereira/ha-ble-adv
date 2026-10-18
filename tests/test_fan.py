@@ -228,7 +228,7 @@ async def test_fan_speed_presets(device: _Device) -> None:
     assert fan.preset_mode == PRESET_MODE_SLEEP
     assert fan.percentage == ranged_value_to_percentage((1, 6), 1)
     assert fan.get_attrs() == {ATTR_ON: True, ATTR_SPEED_COUNT: 6, ATTR_DIR: True, ATTR_OSC: False, ATTR_PRESET: None, ATTR_SPEED: 1}
-    device.assert_apply_change(fan, [ATTR_ON, ATTR_SPEED])
+    device.assert_apply_change(fan, [ATTR_ON, ATTR_SPEED, ATTR_PRESET])
 
     # Test setting work mode preset -> speed 3 (50%)
     await fan.async_set_preset_mode(PRESET_MODE_WORK)
