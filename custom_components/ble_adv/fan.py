@@ -164,13 +164,13 @@ class BleAdvFan(BleAdvEntity, FanEntity):
             ATTR_DIR: self._attr_direction == DIRECTION_FORWARD,
             ATTR_OSC: self._attr_oscillating,
             ATTR_PRESET: preset_attr,
-            ATTR_SPEED: ceil(percentage_to_ranged_value((1, self._attr_speed_count), eff_percentage)),
+            ATTR_SPEED: max(1, round(percentage_to_ranged_value((1, self._attr_speed_count), eff_percentage))),
         }
 
     def forced_changed_attr_on_start(self) -> list[str]:
         """List Forced changed attributes on start."""
         forced_attrs = []
-        if self._attr_supported_features & FanEntityFeature.PRESET_MODE and self._attr_preset_mode in self._hardware_presets:
+        if self._attr_supported_features & FanEntityFeature.PRESET_MODE and len(self._hardware_presets) > 0:
             forced_attrs.append(ATTR_PRESET)
         if self.refresh_osc_on_start and self._attr_supported_features & FanEntityFeature.OSCILLATE:
             forced_attrs.append(ATTR_OSC)

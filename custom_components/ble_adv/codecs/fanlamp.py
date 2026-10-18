@@ -73,7 +73,7 @@ class FanLampEncoder(BleAdvCodec):
 
         nm_as_sl = TranslatorSet(translators[:])
         nm_as_sl.delete(BleAdvEncCmd(0x12)).delete(BleAdvEncCmd(0x13))
-        nm_as_sl.replace(Trans(LightCmd(1).act(ATTR_ON, ATTR_CMD_TOGGLE), EncCmd(0x23)).no_direct())
+        nm_as_sl.replace(Trans(LightCmd(1).act(ATTR_ON, ATTR_CMD_TOGGLE), EncCmd(0x23)))
         nm_as_sl.add_translators(
             [
                 Trans(LightCmd(1).act(ATTR_ON, True), EncCmd(0x23)).no_reverse(),

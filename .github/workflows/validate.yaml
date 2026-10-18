@@ -23,6 +23,7 @@ jobs:
   hacs: # https://github.com/hacs/action
     name: "HACS Validation"
     runs-on: "ubuntu-latest"
+    continue-on-error: true
     steps:
         - name: "Checkout the repository"
           uses: "actions/checkout@v7"

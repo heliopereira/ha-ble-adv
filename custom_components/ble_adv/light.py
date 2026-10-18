@@ -111,6 +111,7 @@ class BleAdvLightNightMode(BleAdvLightBinary):
 
     def __init__(self, device: BleAdvDevice, index: int = 1) -> None:
         super().__init__(LIGHT_TYPE_ONOFF, device, index)
+        self._attr_translation_key = "night_mode"
 
 
 class BleAdvLightWithBrightness(BleAdvLightBase):
