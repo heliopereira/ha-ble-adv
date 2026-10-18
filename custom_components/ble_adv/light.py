@@ -35,7 +35,16 @@ from .codecs.const import (
     LIGHT_TYPE_ONOFF,
     LIGHT_TYPE_RGB,
 )
-from .const import CONF_EFFECTS, CONF_FORCED_CMDS, CONF_LIGHTS, CONF_MIN_BRIGHTNESS, CONF_REFRESH_ON_START, CONF_REVERSED
+from .const import (
+    CONF_EFFECTS,
+    CONF_FORCED_CMDS,
+    CONF_LIGHTS,
+    CONF_MIN_BRIGHTNESS,
+    CONF_REFRESH_ON_START,
+    CONF_REVERSED,
+    CONF_USE_NIGHT_MODE,
+    DOMAIN,
+)
 from .device import ATTR_IS_ON, BleAdvDevice, BleAdvEntAttr, BleAdvEntity, BleAdvStateAttribute
 
 
@@ -63,10 +72,16 @@ def create_entity(options: dict[str, Any], device: BleAdvDevice, index: int) -> 
     return light
 
 
-async def async_setup_entry(_: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
-    """Entr setup."""
-    device: BleAdvDevice = entry.runtime_data
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+    """Entry setup."""
+    device: BleAdvDevice = getattr(entry, "runtime_data", None) or hass.data[DOMAIN][entry.entry_id]
     entities = [create_entity(options, device, i) for i, options in enumerate(entry.data[CONF_LIGHTS]) if CONF_TYPE in options]
+    if (
+        entry.data.get(CONF_LIGHTS)
+        and entry.data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE)
+        and not any(e.id == (LIGHT_TYPE, 1) for e in entities)
+    ):
+        entities.append(BleAdvLightNightMode(device, 1))
     async_add_entities(entities, True)
 
 
@@ -79,12 +94,23 @@ class BleAdvLightBase(BleAdvEntity, LightEntity):
         super().__init__(LIGHT_TYPE, sub_type, device, index)
 
 
+
 class BleAdvLightBinary(BleAdvLightBase):
     """Binary Light."""
 
     _attr_supported_color_modes = {ColorMode.ONOFF}
     _attr_color_mode = ColorMode.ONOFF
     _state_attributes = frozenset([BleAdvStateAttribute(ATTR_IS_ON, False, [ATTR_ON])])
+
+
+class BleAdvLightNightMode(BleAdvLightBinary):
+    """Night Mode / Sleep Light entity."""
+
+    _attr_translation_key = "night_mode"
+    _attr_icon = "mdi:weather-night"
+
+    def __init__(self, device: BleAdvDevice, index: int = 1) -> None:
+        super().__init__(LIGHT_TYPE_ONOFF, device, index)
 
 
 class BleAdvLightWithBrightness(BleAdvLightBase):

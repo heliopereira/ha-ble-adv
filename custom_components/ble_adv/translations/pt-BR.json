@@ -182,7 +182,8 @@
               "refresh_on_start": "Forçar atualização de cor/brilho ao LIGAR",
               "reversed": "Inverter Frio / Quente",
               "forced_cmds": "Comandos sempre enviados mesmo sem alteração",
-              "effects": "Modos de Luz"
+              "effects": "Modos de Luz",
+              "use_night_mode": "Habilitar Modo Noturno / Sleep (Luz Noturna)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Luz Noturna"
       }
     }
   },

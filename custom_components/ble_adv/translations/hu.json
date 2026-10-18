@@ -182,7 +182,8 @@
               "refresh_on_start": "Szín / fényerő frissítés bekapcsoláskor",
               "reversed": "Hideg / meleg megfordítása",
               "forced_cmds": "Parancsok mindig elküldve, még ha semmi sem változott",
-              "effects": "Világítási módok"
+              "effects": "Világítási módok",
+              "use_night_mode": "Éjszakai mód / alvás mód engedélyezése (éjszakai fény)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Éjszakai fény"
       }
     }
   },

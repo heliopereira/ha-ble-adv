@@ -182,7 +182,8 @@
               "refresh_on_start": "Forcer le rafraichissement de la Température / Luminosité au démarrage",
               "reversed": "Inverser Chaud / Froid",
               "forced_cmds": "Commandes systématiquement envoyées même sans changement",
-              "effects": "Effets"
+              "effects": "Effets",
+              "use_night_mode": "Activer le Mode Nuit / Sommeil (Veilleuse)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Veilleuse"
       }
     }
   },

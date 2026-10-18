@@ -182,7 +182,8 @@
               "refresh_on_start": "Vynútiť obnovenie farby / jasu pri zapnutí",
               "reversed": "Prehodiť studená / teplá",
               "forced_cmds": "Príkazy vždy odoslané aj keď sa nič nezmenilo",
-              "effects": "Režimy osvetlenia"
+              "effects": "Režimy osvetlenia",
+              "use_night_mode": "Povoliť nočný režim / režim spánku (nočné svetlo)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Nočné svetlo"
       }
     }
   },

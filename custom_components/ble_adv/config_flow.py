@@ -83,6 +83,7 @@ from .const import (
     CONF_TYPE_NONE,
     CONF_USE_DIR,
     CONF_USE_OSC,
+    CONF_USE_NIGHT_MODE,
     DOMAIN,
 )
 from .coordinator import BleAdvBaseDevice, BleAdvCoordinator
@@ -740,6 +741,10 @@ class BleAdvConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._data[CONF_LIGHTS] = self._convert_to_list(LIGHT_TYPE, user_input)
             self._data[CONF_FANS] = self._convert_to_list(FAN_TYPE, user_input)
+            if self._data[CONF_LIGHTS] and self._data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE):
+                self._data[CONF_TECHNICAL][CONF_TRANS_SET] = "nm_as_second_light"
+            elif self._data[CONF_TECHNICAL].get(CONF_TRANS_SET) == "nm_as_second_light":
+                self._data[CONF_TECHNICAL][CONF_TRANS_SET] = BleAdvCodec.DEF_TRANS_NAME
             if self._has_one_entity():
                 if self._finalize_requested:
                     return await self.async_step_finalize()
@@ -754,6 +759,8 @@ class BleAdvConfigFlow(ConfigFlow, domain=DOMAIN):
         # Build one section for each Light supported by the codec
         for i, feats in enumerate(codec.get_supported_features(LIGHT_TYPE, tr_set)):
             if ATTR_SUB_TYPE in feats:
+                if i == 1 and self._data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE):
+                    continue
                 opts = self._data[CONF_LIGHTS][i]
                 types = [*feats[ATTR_SUB_TYPE], CONF_TYPE_NONE]
                 schema_opts: dict[vol.Schemable, Any] = {
@@ -766,6 +773,8 @@ class BleAdvConfigFlow(ConfigFlow, domain=DOMAIN):
                     schema_opts[vol.Required(CONF_REFRESH_ON_START, default=opts.get(CONF_REFRESH_ON_START, False))] = bool
                 if LIGHT_TYPE_CWW in types:
                     schema_opts[vol.Required(CONF_REVERSED, default=opts.get(CONF_REVERSED, False))] = bool
+                if i == 0 and "nm_as_second_light" in codec.get_translator_sets():
+                    schema_opts[vol.Required(CONF_USE_NIGHT_MODE, default=opts.get(CONF_USE_NIGHT_MODE, False))] = bool
                 schema_opts[vol.Required(CONF_FORCED_CMDS, default=opts.get(CONF_FORCED_CMDS, []))] = self._get_multi_selector(
                     CONF_FORCED_CMDS, forced_cmds
                 )

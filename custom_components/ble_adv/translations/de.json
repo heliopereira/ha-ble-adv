@@ -182,7 +182,8 @@
               "refresh_on_start": "Farbe/Helligkeit beim Einschalten erzwungen aktualisieren",
               "reversed": "Kalt/Warm umkehren",
               "forced_cmds": "Befehle immer senden, auch wenn sich nichts geändert hat",
-              "effects": "Lichtmodi"
+              "effects": "Lichtmodi",
+              "use_night_mode": "Nachtmodus / Schlafmodus aktivieren (Nachtlicht)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Nachtlicht"
       }
     }
   },

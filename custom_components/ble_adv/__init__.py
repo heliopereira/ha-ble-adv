@@ -48,6 +48,7 @@ from .const import (
     CONF_REPEATS,
     CONF_TECHNICAL,
     CONF_TRANS_SET,
+    CONF_USE_NIGHT_MODE,
     CONF_USE_DIR,
     CONF_USE_OSC,
     DOMAIN,
@@ -218,6 +219,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: BleAdvConfigEntry) -> bo
     prefixes = tuple(f"{bt_manager.name}/" for bt_manager in coordinator.bt_managers)
     adapter_ids = [a if a.startswith(prefixes) else f"esp/{a}" for a in tech_conf[CONF_ADAPTER_IDS]]
 
+    trans_set = tech_conf.get(CONF_TRANS_SET)
+    if (not trans_set or trans_set == BleAdvCodec.DEF_TRANS_NAME) and entry.data.get(CONF_LIGHTS) and entry.data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE):
+        trans_set = "nm_as_second_light"
+
     entry.runtime_data = BleAdvDevice(
         hass,
         entry.unique_id,
@@ -227,7 +232,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: BleAdvConfigEntry) -> bo
         tech_conf[CONF_REPEATS],
         tech_conf[CONF_INTERVAL],
         tech_conf[CONF_DURATION],
-        BleAdvConfig(device_conf[CONF_FORCED_ID], device_conf[CONF_INDEX], device_conf.get(CONF_PARAMS), tech_conf.get(CONF_TRANS_SET)),
+        BleAdvConfig(device_conf[CONF_FORCED_ID], device_conf[CONF_INDEX], device_conf.get(CONF_PARAMS), trans_set),
         coordinator,
     )
     for rconf in entry.data[CONF_REMOTES]:

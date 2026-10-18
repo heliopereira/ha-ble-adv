@@ -182,7 +182,8 @@
               "refresh_on_start": "Forzar refresco de color / brillo al ENCENDER",
               "reversed": "Invertir Frío / Cálido",
               "forced_cmds": "Comandos enviados siempre, incluso si nada ha cambiado",
-              "effects": "Modos de luz"
+              "effects": "Modos de luz",
+              "use_night_mode": "Activar Modo Nocturno / Sleep (Luz Nocturna)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Luz Nocturna"
       }
     }
   },

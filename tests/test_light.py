@@ -30,8 +30,17 @@ from ble_adv.codecs.const import (
     LIGHT_TYPE_RGB,
 )
 from ble_adv.codecs.models import BleAdvEntAttr
-from ble_adv.const import CONF_EFFECTS, CONF_LIGHTS, CONF_REVERSED
-from ble_adv.light import async_setup_entry, create_entity
+from ble_adv.const import (
+    CONF_EFFECTS,
+    CONF_LIGHTS,
+    CONF_REVERSED,
+    CONF_USE_NIGHT_MODE,
+)
+from ble_adv.light import (
+    BleAdvLightNightMode,
+    async_setup_entry,
+    create_entity,
+)
 from homeassistant.components.light.const import ColorMode, LightEntityFeature
 from homeassistant.const import CONF_TYPE
 from homeassistant.core import HomeAssistant
@@ -221,3 +230,26 @@ async def test_light_rgb(device: _Device) -> None:
     assert light.get_attrs() == {ATTR_ON: True, ATTR_SUB_TYPE: LIGHT_TYPE_RGB, **rgbr(mid_f, mid_f, mid_f, 126.0 / 255.0), ATTR_EFFECT: None}
     light.apply_attrs(BleAdvEntAttr([ATTR_BR], {ATTR_BR: 1.0}, LIGHT_TYPE, 0))
     assert light.get_attrs() == {ATTR_ON: True, ATTR_SUB_TYPE: LIGHT_TYPE_RGB, **rgbr(mid_f, mid_f, mid_f, 1.0), ATTR_EFFECT: None}
+
+
+async def test_light_night_mode(device: _Device) -> None:
+    """Test Night Mode / Sleep light entity."""
+    nm_light = BleAdvLightNightMode(device, 1)
+    assert nm_light.id == (LIGHT_TYPE, 1)
+    assert nm_light.supported_color_modes == {ColorMode.ONOFF}
+    assert nm_light.translation_key == "night_mode"
+    await nm_light.async_added_to_hass()
+    assert not nm_light.is_on
+    assert nm_light.get_attrs() == {ATTR_ON: False, ATTR_SUB_TYPE: LIGHT_TYPE_ONOFF}
+
+    # Test Turn ON -> sends ATTR_ON: True
+    await nm_light.async_turn_on()
+    assert nm_light.is_on
+    assert nm_light.get_attrs() == {ATTR_ON: True, ATTR_SUB_TYPE: LIGHT_TYPE_ONOFF}
+    device.assert_apply_change(nm_light, [ATTR_ON])
+
+    # Test Turn OFF -> sends ATTR_ON: False
+    await nm_light.async_turn_off()
+    assert not nm_light.is_on
+    assert nm_light.get_attrs() == {ATTR_ON: False, ATTR_SUB_TYPE: LIGHT_TYPE_ONOFF}
+    device.assert_apply_change(nm_light, [ATTR_ON])

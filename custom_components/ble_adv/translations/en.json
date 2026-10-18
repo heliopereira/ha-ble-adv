@@ -182,7 +182,8 @@
               "refresh_on_start": "Force color / brightness refresh when switched ON",
               "reversed": "Reverse Cold / Warm",
               "forced_cmds": "Commands always sent even if nothing changed",
-              "effects": "Light Modes"
+              "effects": "Light Modes",
+              "use_night_mode": "Enable Night Mode / Sleep (Night Light)"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "Night Light"
       }
     }
   },

@@ -182,7 +182,8 @@
               "refresh_on_start": "打开时强制刷新颜色 / 亮度",
               "reversed": "反转冷白 / 暖白",
               "forced_cmds": "即使没有变化也始终发送的命令",
-              "effects": "灯光模式"
+              "effects": "灯光模式",
+              "use_night_mode": "启用夜间模式/睡眠模式（小夜灯）"
             }
           },
           "light_1": {
@@ -480,6 +481,9 @@
             }
           }
         }
+      },
+      "night_mode": {
+        "name": "小夜灯"
       }
     }
   },
