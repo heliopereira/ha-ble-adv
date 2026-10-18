@@ -48,8 +48,8 @@ from .const import (
     CONF_REPEATS,
     CONF_TECHNICAL,
     CONF_TRANS_SET,
-    CONF_USE_NIGHT_MODE,
     CONF_USE_DIR,
+    CONF_USE_NIGHT_MODE,
     CONF_USE_OSC,
     DOMAIN,
     PLATFORMS,
@@ -220,7 +220,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: BleAdvConfigEntry) -> bo
     adapter_ids = [a if a.startswith(prefixes) else f"esp/{a}" for a in tech_conf[CONF_ADAPTER_IDS]]
 
     trans_set = tech_conf.get(CONF_TRANS_SET)
-    if (not trans_set or trans_set == BleAdvCodec.DEF_TRANS_NAME) and entry.data.get(CONF_LIGHTS) and entry.data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE):
+    if (
+        (not trans_set or trans_set == BleAdvCodec.DEF_TRANS_NAME)
+        and entry.data.get(CONF_LIGHTS)
+        and entry.data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE)
+    ):
         trans_set = "nm_as_second_light"
 
     entry.runtime_data = BleAdvDevice(

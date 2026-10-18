@@ -65,10 +65,10 @@ from .const import (
     CONF_PAIRED,
     CONF_PARAMS,
     CONF_PHONE_APP,
-    CONF_PRESETS,
     CONF_PRESET_SLEEP,
     CONF_PRESET_TURBO,
     CONF_PRESET_WORK,
+    CONF_PRESETS,
     CONF_RAW,
     CONF_REFRESH_DIR_ON_START,
     CONF_REFRESH_ON_START,
@@ -82,8 +82,8 @@ from .const import (
     CONF_TRANS_SET,
     CONF_TYPE_NONE,
     CONF_USE_DIR,
-    CONF_USE_OSC,
     CONF_USE_NIGHT_MODE,
+    CONF_USE_OSC,
     DOMAIN,
 )
 from .coordinator import BleAdvBaseDevice, BleAdvCoordinator

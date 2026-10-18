@@ -34,7 +34,6 @@ from ble_adv.const import (
     CONF_EFFECTS,
     CONF_LIGHTS,
     CONF_REVERSED,
-    CONF_USE_NIGHT_MODE,
 )
 from ble_adv.light import (
     BleAdvLightNightMode,

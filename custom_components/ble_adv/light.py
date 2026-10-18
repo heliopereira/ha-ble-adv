@@ -76,11 +76,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     """Entry setup."""
     device: BleAdvDevice = getattr(entry, "runtime_data", None) or hass.data[DOMAIN][entry.entry_id]
     entities = [create_entity(options, device, i) for i, options in enumerate(entry.data[CONF_LIGHTS]) if CONF_TYPE in options]
-    if (
-        entry.data.get(CONF_LIGHTS)
-        and entry.data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE)
-        and not any(e.id == (LIGHT_TYPE, 1) for e in entities)
-    ):
+    if entry.data.get(CONF_LIGHTS) and entry.data[CONF_LIGHTS][0].get(CONF_USE_NIGHT_MODE) and not any(e.id == (LIGHT_TYPE, 1) for e in entities):
         entities.append(BleAdvLightNightMode(device, 1))
     async_add_entities(entities, True)
 
@@ -92,7 +88,6 @@ class BleAdvLightBase(BleAdvEntity, LightEntity):
 
     def __init__(self, sub_type: str, device: BleAdvDevice, index: int) -> None:
         super().__init__(LIGHT_TYPE, sub_type, device, index)
-
 
 
 class BleAdvLightBinary(BleAdvLightBase):
